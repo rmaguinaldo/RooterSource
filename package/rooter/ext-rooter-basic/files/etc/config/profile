@@ -12,6 +12,9 @@ config default 'default'
 	option tzone '0'
 	option nodhcp '0'
 	option pdptype '0'
+	option dns1 '8.8.8.8'
+	option dns2 '8.8.4.4'
+
 
 config disable 'disable'
 	option enabled '0'

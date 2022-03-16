@@ -59,6 +59,12 @@ do_down() {
 			echo "1" > /tmp/modgone
 			log "Setting Modem Removal flag"
 			sleep 60
+		#ECM
+		elif [ $PROT -eq "5" ]; then
+			CPORT=$(uci get modem.modem$CURRMODEM.commport)
+			ATCMDD="AT+CFUN=4;+CFUN=1"
+			$ROOTER/gcom/gcom-locked "/dev/ttyUSB$CPORT" "run-at.gcom" "$CURRMODEM" "$ATCMDD"
+			sleep 60
 		else
 			if [ -f $ROOTER_LINK/reconnect$CURRMODEM ]; then
 				$ROOTER_LINK/reconnect$CURRMODEM $CURRMODEM &
@@ -79,11 +85,19 @@ log "Start Connection Monitor for Modem $CURRMODEM"
 sleep 30
 
 while [ 1 = 1 ]; do
+	ps | grep -v grep | grep getsignal
+
+	if [ $? -ne 0 ] ; then
+		PROT=$(uci get modem.modem$CURRMODEM.proto)
+		$ROOTER_LINK/getsignal$CURRMODEM $CURRMODEM $PROT &
+	fi
+
 	CP=$(uci -q get ping.ping.enable)
 	if [ $CP = "1" ]; then
 		echo 'MONSTAT="'"Custom Ping Test"'"' > /tmp/monstat$CURRMODEM
 		sleep 60
 	else
+
 		ACTIVE=$(uci get modem.pinginfo$CURRMODEM.alive)
 		if [ $ACTIVE = "0" ]; then
 			echo 'MONSTAT="'"Disabled"'"' > /tmp/monstat$CURRMODEM
@@ -125,10 +139,10 @@ while [ 1 = 1 ]; do
 					sleep 20
 				else
 					# check to see if modem iface has an IP address, if not try a reconnect/power toggle
-					OX=$(ip address show $IFNAME 2>&1)
-					ip4=$(echo "$OX" | grep 'inet ' | cut -d' ' -f6)
-					ip6=$(echo "$OX" | grep 'inet6' | grep global | cut -d' ' -f6)
-								if [ -z "$ip4" -a -z "$ip6" ]; then
+								OX=$(ip address show $IFNAME 2>&1)
+						ip4=$(echo "$OX" | grep 'inet ' | cut -d' ' -f6)
+						ip6=$(echo "$OX" | grep 'inet6' | grep global | cut -d' ' -f6)
+									if [ -z "$ip4" -a -z "$ip6" ]; then
 										do_down " (no IP address)"
 								fi
 

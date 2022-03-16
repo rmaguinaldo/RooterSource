@@ -15,11 +15,11 @@ s.addremove = false
 c1 = s:option(ListValue, "splashpage", "Enable Network Status Page Before Login :");
 c1:value("0", "Disabled")
 c1:value("1", "Enabled")
-c1.default=0
+c1.default=1
 
 a1 = s:option(Value, "splashtitle", "Network Status Title :"); 
 a1.optional=false;
-a1.default = "ROOter Status"
+a1.default = "Network Status"
 a1:depends("splashpage", "1")
 
 dc1 = s:option(ListValue, "dual", "Enable Modem 2 Status :");

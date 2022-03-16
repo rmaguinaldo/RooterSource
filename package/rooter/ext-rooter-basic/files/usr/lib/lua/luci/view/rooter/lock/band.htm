@@ -1,0 +1,246 @@
+<script type="text/javascript">//<![CDATA[
+	
+	getLTEBand();
+	
+	function getLTEBand()
+	{
+		XHR.halt();
+		L.Request.get(L.url('admin/modem/get_lteband')).then(function (res) {
+			var rv=res.json();
+			var status = rv.status
+			if (status == "OK") 
+				{
+					var lteband = rv.lteband;
+					var modemtype = rv.modemtype;
+					var modemidp = rv.idP;
+					initModemDefault(modemtype, modemidp);
+					initBandSel(lteband);
+				}
+		});
+		XHR.run();
+	}
+	
+	function resetlteband(btn)
+	{
+		document.getElementById("resetlte").value="Resetting Change";
+		document.getElementById("resetlte").disabled=true;
+		getLTEBand();
+		
+		var spinHandle = loadingOverlay.activate();
+		setTimeout(function() {
+   			loadingOverlay.cancel(spinHandle);
+		},3000);
+
+		document.getElementById("resetlte").value="RESET LTE BAND";
+		document.getElementById("resetlte").disabled=false;
+		return false;
+	}
+	
+	function applylteband(btn)
+	{	
+		XHR.halt();
+		var spinHandle = loadingOverlay.activate();
+		document.getElementById("applylte").value="Applying Change";
+		document.getElementById("applylte").disabled=true;
+		var mt = g_lte_bands;
+		L.Request.get(L.url('admin/modem/set_lteband'), {query: {set:mt}}).then(function () {
+			loadingOverlay.cancel(spinHandle);
+			document.getElementById("applylte").value="APPLY LTE BAND";
+			document.getElementById("applylte").disabled=false;
+		});		
+		XHR.run();
+		return false;
+	}
+	
+
+//]]></script>
+
+<fieldset class="cbi-section" id="cbi-lteband">
+   <legend><%:LTE Band Selection%></legend>
+   <div class="table" width="100%">
+      <div class="tr">
+         <div class="td left">
+            <div class="cbi-value">
+               <label  class="cbi-value-title"><strong><%:LTE ALL%></strong></label>
+               <div class="cbi-value-field">
+                  <input type="checkbox" id="LTE_ALL" name="lte_band" disabled/>
+               </div>
+            </div>
+            <div id="upstream_status_table" class="network-status-table">
+               <div class="ifacebox">
+                  <div class="ifacebox-head center active"><strong>LTE FDD</strong></div>
+                  <div class="ifacebox-body left">
+                     <div class="cbi-value">
+                        <label  class="cbi-value-title"><%:B1 (2100mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B1" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B2 (1900mhz)%></label>
+                        <div class="cbi-value-field">	
+                           <input type="checkbox" id="LTE_B2" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B3 (1800mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B3" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B4 (1700mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B4" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B5 (850mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B5" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B7 (2600mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B7" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B8 (900mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B8" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B9 (1800mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B9" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B12 (700mhz ac)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B12" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B13 (700mhz c)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B13" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B18 (800mhz lower)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B18" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B19 (850mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B19" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B20 (800mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B20" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B26 (850mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B26" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B28 (700mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B28" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B29 (700mhz lower)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B29" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B30 (2300mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B30" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B32 (1500mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B32" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <!-- <div class="cbi-value">	
+                        <label class="cbi-value-title"><%:B66 (1700mhz)%></label>
+                        <div class="cbi-value-field">
+                        	<input type="checkbox" id="LTE_B66" name="lte_band" disabled/>
+                        </div>
+                        </div> -->
+                  </div>
+               </div>
+               <div class="ifacebox">
+                  <div class="ifacebox-head center active"><strong>LTE TDD</strong></div>
+                  <div class="ifacebox-body left">
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B38 (2600mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B38" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B40 (2300mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B40" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B41 (2500mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B41" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B42 (3500mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B42" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B43 (3700mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B43" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B46 (5200mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B46" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                     <div class="cbi-value">
+                        <label class="cbi-value-title"><%:B48 (3500mhz)%></label>
+                        <div class="cbi-value-field">
+                           <input type="checkbox" id="LTE_B48" name="lte_band" disabled/>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="tr">
+         <div class="td left">
+            <input type="button" id="applylte" class="cbi-button cbi-button-apply" value="<%:Apply LTE Band%>" onclick="return applylteband(this)" />
+            <input type="button" id="resetlte" class="cbi-button cbi-button-apply" value="<%:Reset LTE Band%>" onclick="return resetlteband(this)" />
+         </div>
+      </div>
+   </div>
+</fieldset>

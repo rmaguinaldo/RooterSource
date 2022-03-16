@@ -3,7 +3,7 @@ module("luci.controller.bwmon", package.seeall)
 function index()
 	local page
 	entry({"admin", "nlbw"}, firstchild(), "Bandwidth Monitor", 80).dependent=false
-	page = entry({"admin", "nlbw", "bwmon"}, template("bwmon/bwmon"), "ROOter Bandwidth Monitor", 70)
+	page = entry({"admin", "nlbw", "bwmon"}, template("bwmon/bwmon"), "Bandwidth Monitor", 70)
 	page.dependent = true
 	
 	entry({"admin", "nlbw", "check_bw"}, call("action_check_bw"))

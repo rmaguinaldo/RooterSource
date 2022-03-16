@@ -1,5 +1,5 @@
 #!/bin/sh
- 
+
 . /lib/functions.sh
 
 ROOTER=/usr/lib/rooter
@@ -275,11 +275,26 @@ if [ $MATCH = 0 ]; then
 	uci set modem.modeminfo$CURRMODEM.apn=$apn
 	uci set modem.modeminfo$CURRMODEM.apn2=$apn2
 	if [ -n "$ICCID" ]; then
-		iccid="891490"
 		case $ICCID in
-		"$iccid"*)
+		"891490"*)
 			uci set modem.modeminfo$CURRMODEM.apn2=""
 			uci set modem.modeminfo$CURRMODEM.apn="internet.freedommobile.ca"
+			;;
+		"896303"*)
+			uci set modem.modeminfo$CURRMODEM.apn2=""
+			uci set modem.modeminfo$CURRMODEM.apn="internet"
+			;;
+		"896302"*)
+			uci set modem.modeminfo$CURRMODEM.apn2=""
+			uci set modem.modeminfo$CURRMODEM.apn="internet.globe.com.ph"
+			;;
+		"896305"*)
+			uci set modem.modeminfo$CURRMODEM.apn2=""
+			uci set modem.modeminfo$CURRMODEM.apn="minternet"
+			;;
+		"896366"*)
+			uci set modem.modeminfo$CURRMODEM.apn2=""
+			uci set modem.modeminfo$CURRMODEM.apn="internet.dito.ph"
 			;;
 		esac
 	fi

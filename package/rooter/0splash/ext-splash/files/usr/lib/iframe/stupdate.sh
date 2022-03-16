@@ -192,13 +192,13 @@ if [ $splash = "1" ]; then
 	SPSTATUS="/tmp/www/splash.html"
 	rm -f $STEMP
 	cp $STATUS $STEMP
-	button="<div class='rooterPageContentBW'><div class="" id=\"rooterItems\"><a href='cgi-bin/luci'><div class=\"rooterItem\" id=\"rooterItem1\"><div class=\"rooterItemTitle\"><i class='icon icon-cog'></i> Router Login</div><div class=\"rooterItemTitle\"></div></div></a></div></div>"
+	button="<div class='rooterPageContentBW'><div class="" id=\"rooterItems\"><a href='cgi-bin/luci/'><div class=\"rooterItem\" id=\"rooterItem1\"><div class=\"rooterItemTitle\"><i class='icon icon-cog'></i> Router Login</div></div></a></div></div>"
 	sed -i -e "s!#BUTTON#!$button!g" $STEMP
 	sed -i -e "s!#LUCIS#!luci-static/!g" $STEMP
 	titlebar="<div class='rooterPageHead'><a  href='http://#URL#'><div class=\"rooterHeadTitle\"> #TITLE#</div></a></div>"
 	url=$(uci -q get iframe.iframe.url)
 	if [ -z $url ]; then
-		url="www.ofmodemsandmen.com"
+		url="https://facebook.com/rnbgoodiesph/"
 	fi
 	titlebar=$(echo "$titlebar" | sed -e "s!#URL#!$url!g")
 	sed -i -e "s!#TITLEBAR#!$titlebar!g" $STEMP
@@ -262,7 +262,7 @@ if [ $splash = "1" ]; then
 	sed -i -e "s!#PORT#!$namev!g" $STEMP
 	level2txt "$tempur" "single"
 	sed -i -e "s!#TEMP#!$namev!g" $STEMP
-	
+
 	dual=$(uci -q get iframe.iframe.dual)
 	if [ $dual = "1" ]; then
 		STEMP2="/tmp/www/stemp2.html"

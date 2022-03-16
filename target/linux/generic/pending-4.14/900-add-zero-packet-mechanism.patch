@@ -1,0 +1,15 @@
+--- a/drivers/usb/serial/usb_wwan.c	2021-01-13 03:09:15.000000000 +0800
++++ b/drivers/usb/serial/usb_wwan.c	2021-03-10 18:20:07.220668040 +0800
+@@ -506,6 +506,12 @@
+ 	usb_fill_bulk_urb(urb, serial->dev,
+ 			  usb_sndbulkpipe(serial->dev, endpoint) | dir,
+ 			  buf, len, callback, ctx);
++	
++	if (dir == USB_DIR_OUT) {
++  		struct usb_device_descriptor *desc = &serial->dev->descriptor; 
++		if (desc->idVendor == cpu_to_le16(0x2C7C)) 
++  			urb->transfer_flags |= URB_ZERO_PACKET; 
++	}
+ 
+ 	if (intfdata->use_zlp && dir == USB_DIR_OUT)
+ 		urb->transfer_flags |= URB_ZERO_PACKET;

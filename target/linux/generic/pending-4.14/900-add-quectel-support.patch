@@ -1,0 +1,38 @@
+--- a/drivers/usb/serial/option.c	2021-02-14 02:08:48.355319000 +0800
++++ b/drivers/usb/serial/option.c	2021-03-10 18:19:19.197391684 +0800
+@@ -2125,6 +2125,7 @@
+ #ifdef CONFIG_PM
+ 	.suspend           = usb_wwan_suspend,
+ 	.resume            = usb_wwan_resume,
++	.reset_resume      = usb_wwan_resume,
+ #endif
+ };
+ 
+@@ -2176,6 +2177,27 @@
+ 	 */
+ 	if (device_flags & NUMEP2 && iface_desc->bNumEndpoints != 2)
+ 		return -ENODEV;
++		
++	if (serial->dev->descriptor.idVendor == cpu_to_le16(QUECTEL_VENDOR_ID)) {
++		//some interfaces can be used as USB Network device (ecm, rndis, mbim)
++		if (serial->interface->cur_altsetting->desc.bInterfaceClass != 0xFF) {
++			return -ENODEV;
++		//interface 4 can be used as USB Network device (qmi)
++		} else if (serial->interface->cur_altsetting->desc.bInterfaceNumber >= 4) {
++			return -ENODEV;
++		}
++	}
++		
++	//For USB Auto Suspend
++	if (serial->dev->descriptor.idVendor == cpu_to_le16(QUECTEL_VENDOR_ID)) { 
++ 		pm_runtime_set_autosuspend_delay(&serial->dev->dev, 3000); 
++ 		usb_enable_autosuspend(serial->dev); 
++	} 
++	
++	//For USB Remote Wakeup
++	if (serial->dev->descriptor.idVendor == cpu_to_le16(QUECTEL_VENDOR_ID)) { 
++ 		device_init_wakeup(&serial->dev->dev, 1); //usb remote wakeup 
++	}
+ 
+ 	if (dev_desc->idVendor == cpu_to_le16(MEIG_VENDOR_ID) &&
+ 	    (dev_desc->idProduct == cpu_to_le16(MEIG_PRODUCT_9025) ||

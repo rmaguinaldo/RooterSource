@@ -10,6 +10,7 @@ function index()
 	entry({"admin", "modem", "cust"}, cbi("rooter/customize"), "Custom Modem Ports", 55)
 	entry({"admin", "modem", "log"}, template("rooter/log"), "Connection Log", 60)
 	entry({"admin", "modem", "misc"}, template("rooter/misc"), "Miscellaneous", 40)
+	entry({"admin", "modem", "lock"}, template("rooter/lock"), "LTE Band and Cell Locking", 45)
 	
 	entry({"admin", "modem", "block"},
 		template("rooter/bandlock"))
@@ -37,6 +38,11 @@ function index()
 	entry({"admin", "modem", "extping"}, call("action_extping"))
 	entry({"admin", "modem", "change_cell"}, call("action_change_cell"))
 	entry({"admin", "modem", "change_proto"}, call("action_change_proto"))
+	entry({"admin", "modem", "get_lteband"}, call("action_get_lteband"))
+	entry({"admin", "modem", "set_lteband"}, call("action_set_lteband"))
+	entry({"admin", "modem", "get_cell_details"}, call("action_get_cell_details"))
+	entry({"admin", "modem", "lock_cell"}, call("action_lock_cell"))
+
 end
 
 function trim(s)
@@ -595,4 +601,150 @@ function action_change_proto()
 	local set = luci.http.formvalue("set")
 	os.execute("/usr/lib/rooter/luci/protochnge.sh " ..set)
 end
+
+function action_get_lteband()
+	local rv ={}
+	modnum = luci.model.uci.cursor():get("modem", "general", "miscnum")
+	modemtype = luci.model.uci.cursor():get("modem", "modem" .. modnum, "modemtype")
+	idV = luci.model.uci.cursor():get("modem", "modem" .. modnum, "idV")
+	idP = luci.model.uci.cursor():get("modem", "modem" .. modnum, "idP")
+
+	local file
+	os.execute("/usr/lib/rooter/luci/getlteband.sh")
+
+	result = "/tmp/lteresult" .. modnum .. ".at"
+	file = io.open(result, "r")
+	if file ~= nil then
+		rv["status"] = file:read("*line")
+		rv["lteband"] = file:read("*line")
+		file:close()
+		os.execute("/usr/lib/rooter/luci/luaops.sh delete /tmp/lteresult" .. modnum .. ".at")
+	else
+		rv["result"] = " "
+		rv["lteband"] = " "
+	end
+
+	rv["modemtype"] = modemtype
+	rv["idV"] = idV
+	rv["idP"] = idP
+
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(rv)
+end
+
+function action_set_lteband()
+	local rv ={}
+	modnum = luci.model.uci.cursor():get("modem", "general", "miscnum")
+	local set = luci.http.formvalue("set")
+	fixed = string.gsub(set, "\"", "~")
+	local file
+	os.execute("/usr/lib/rooter/luci/setlteband.sh \'" .. fixed .. "\'")
+
+	result = "/tmp/lockedlte" .. modnum .. ".at"
+	file = io.open(result, "r")
+	if file ~= nil then
+		rv["status"] = file:read("*line")
+		file:close()
+		os.execute("/usr/lib/rooter/luci/luaops.sh delete /tmp/lockedlte" .. modnum .. ".at")
+	else
+		rv["result"] = " "
+	end
+
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(rv)
+end
+
+function action_get_cell_details()
+	local rv = { }
+	local servingcell = { }
+	local neighborcell = { }
+	local modnum = luci.model.uci.cursor():get("modem", "general", "miscnum")
+	local modemtype = luci.model.uci.cursor():get("modem", "modem" .. modnum, "modemtype")
+	local idV = luci.model.uci.cursor():get("modem", "modem" .. modnum, "idV")
+	local idP = luci.model.uci.cursor():get("modem", "modem" .. modnum, "idP")
+
+	os.execute("/usr/lib/rooter/luci/celldetails.sh")
+	
+	local result = "/tmp/celllock" .. modnum .. ".at"
+	local file = io.open(result, "r")
+	if file ~= nil then
+		rv["celllock"] = file:read("*line")
+		os.execute("/usr/lib/rooter/luci/luaops.sh delete /tmp/celllock" .. modnum .. ".at")
+		file:close()
+	else
+		rv["celllock"] = "N"
+	end
+	
+	result = "/tmp/servingcell" .. modnum .. ".at"
+	file = io.open(result, "r")
+	if file ~= nil then
+		local ln = file:read("*line")
+		local cid, cidnum, pci, freq = ln:match("^(%S+),(%S+),(%S+),(%S+)")
+		if cid and cidnum and pci and freq then
+			servingcell["cellid"] = cid .. " (" .. cidnum .. ")"
+			servingcell["pci"] = pci
+			servingcell["frequency"] = freq
+		end
+		file:close()
+	end
+
+	rv["servingcell"] = servingcell
+
+	result = "/tmp/neighborcell" .. modnum .. ".at"
+	file = io.open(result, "r")
+	if file ~= nil then
+		while true do
+			local ln = file:read("*line")
+			if not ln then
+				break
+			else
+				local hover, freq, pci, rsrq, rsrp, rssi = ln:match("^(%S+),(%S+),(%S+),(%S+),(%S+),(%S+)")
+				if hover and freq and pci and rsrq and rsrp and rssi then
+					neighborcell[#neighborcell+1] = {
+						handover = hover,
+						frequency = freq,
+						pci = pci,
+						rsrq = rsrq,
+						rsrp = rsrp,
+						rssi = rssi
+					}
+				end
+			end
+		end
+		file:close()
+	end
+	
+	rv["neighborcells"] = neighborcell
+		
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(rv)
+end
+
+function action_lock_cell()
+	local rv ={}
+	modnum = luci.model.uci.cursor():get("modem", "general", "miscnum")
+	local freq = luci.http.formvalue("freq")
+	local pci = luci.http.formvalue("pci")
+	local file
+	if freq ~= nil and pci ~= nil then
+		os.execute("/usr/lib/rooter/luci/lockcell.sh " .. freq .. " " .. pci)
+	else
+		os.execute("/usr/lib/rooter/luci/lockcell.sh")
+	end
+
+	result = "/tmp/lockedcell" .. modnum .. ".at"
+	file = io.open(result, "r")
+	if file ~= nil then
+		rv["status"] = file:read("*line")
+		file:close()
+		os.execute("/usr/lib/rooter/luci/luaops.sh delete /tmp/lockedcell" .. modnum .. ".at")
+	else
+		rv["result"] = " "
+	end
+
+	luci.http.prepare_content("application/json")
+	luci.http.write_json(rv)
+end
+
+
 
