@@ -195,7 +195,7 @@ if [ $splash = "1" ]; then
 	button="<div class='rooterPageContentBW'><div class="" id=\"rooterItems\"><a href='cgi-bin/luci/'><div class=\"rooterItem\" id=\"rooterItem1\"><div class=\"rooterItemTitle\"><i class='icon icon-cog'></i> Router Login</div></div></a></div></div>"
 	sed -i -e "s!#BUTTON#!$button!g" $STEMP
 	sed -i -e "s!#LUCIS#!luci-static/!g" $STEMP
-	titlebar="<div class='rooterPageHead'><a  href='http://#URL#'><div class=\"rooterHeadTitle\"> #TITLE#</div></a></div>"
+	titlebar="<div class='rooterPageHead'><a  href='#URL#'><div class=\"rooterHeadTitle\"> #TITLE#</div></a></div>"
 	url=$(uci -q get iframe.iframe.url)
 	if [ -z $url ]; then
 		url="https://facebook.com/rnbgoodiesph/"
