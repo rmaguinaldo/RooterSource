@@ -284,6 +284,7 @@ if [ $MATCH = 0 ]; then
 			uci set modem.modeminfo$CURRMODEM.apn2=""
 			uci set modem.modeminfo$CURRMODEM.apn="internet"
 			;;
+		"896342"*|\
 		"896302"*)
 			uci set modem.modeminfo$CURRMODEM.apn2=""
 			uci set modem.modeminfo$CURRMODEM.apn="internet.globe.com.ph"
