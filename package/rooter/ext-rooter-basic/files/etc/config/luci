@@ -27,6 +27,7 @@ config internal 'themes'
 	option Argon '/luci-static/argon'
 	option Bootstrap '/luci-static/bootstrap'
 	option Material '/luci-static/material'
+	option Tomato '/luci-static/opentomato'
 
 config internal 'apply'
 	option rollback '90'
